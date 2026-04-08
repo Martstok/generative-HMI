@@ -1,0 +1,23 @@
+{% set ns = namespace(anchor_map={}) %}
+{% for t in widget.tags %}
+  {% if t.anchor %}
+    {% if ns.anchor_map.update({t.anchor: {'label': t.label, 'unit': t.unit, 'tag': t.tag}}) %}{% endif %}
+  {% endif %}
+{% endfor %}
+<div class="hmi-widget hmi-schematic" style="grid-column: span {{ widget.columns }};">
+  <div class="sch-header">
+    <div class="sch-title">{{ widget.title }}</div>
+    <div class="sch-diagram-key">{{ widget.diagram | upper | replace('_', ' ') }}</div>
+  </div>
+  <div class="sch-canvas">
+    {% if widget.diagram == 'farm_sld' %}
+      {% include 'partials/hmi/diagrams/farm_sld.html' %}
+    {% elif widget.diagram == 'substation_sld' %}
+      {% include 'partials/hmi/diagrams/substation_sld.html' %}
+    {% elif widget.diagram == 'turbine_drivetrain' %}
+      {% include 'partials/hmi/diagrams/turbine_drivetrain.html' %}
+    {% else %}
+      <div class="sch-missing">Unknown diagram: {{ widget.diagram }}</div>
+    {% endif %}
+  </div>
+</div>

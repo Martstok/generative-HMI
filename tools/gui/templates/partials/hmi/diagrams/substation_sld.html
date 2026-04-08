@@ -1,0 +1,175 @@
+{# substation_sld — double-bus switchgear + transformer (1000 x 460) #}
+<svg viewBox="0 0 1000 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Substation single-line diagram">
+  {# ── Static geometry ── #}
+
+  {# Incomer feeders (top) — vertical lines to bus A #}
+  <line x1="260" y1="30" x2="260" y2="110" class="sch-connector"/>
+  <line x1="660" y1="30" x2="660" y2="110" class="sch-connector"/>
+  <polygon points="254,30 266,30 260,18" class="sch-connector" fill="#94a3b8"/>
+  <polygon points="654,30 666,30 660,18" class="sch-connector" fill="#94a3b8"/>
+  <text class="sch-equip-label" x="220" y="14">INCOMER A</text>
+  <text class="sch-equip-label" x="620" y="14">INCOMER B</text>
+
+  {# Bus A #}
+  <text class="sch-equip-label" x="100" y="100">BUS A 33 KV</text>
+  <line x1="100" y1="110" x2="900" y2="110" class="sch-bus"/>
+
+  {# Bus B #}
+  <text class="sch-equip-label" x="100" y="180">BUS B 33 KV</text>
+  <line x1="100" y1="190" x2="900" y2="190" class="sch-bus"/>
+
+  {# Tie line connecting the two buses #}
+  <line x1="150" y1="110" x2="150" y2="190" class="sch-connector"/>
+
+  {# Cross-connections from Bus B down to transformer primary #}
+  <line x1="460" y1="190" x2="460" y2="250" class="sch-connector"/>
+
+  {# Transformer coupled-coil symbol at (430..520, 250..340) #}
+  {# Two vertical coil stacks (3 arcs each) #}
+  {% for i in range(3) %}
+    <path d="M 440 {{ 260 + i*20 }} a 8 8 0 0 1 0 16" class="sch-equip"/>
+    <path d="M 480 {{ 260 + i*20 }} a 8 8 0 0 0 0 16" class="sch-equip"/>
+  {% endfor %}
+  <line x1="460" y1="250" x2="460" y2="260" class="sch-connector"/>
+  <line x1="460" y1="336" x2="460" y2="360" class="sch-connector"/>
+  <rect x="420" y="246" width="80" height="96" class="sch-connector-dashed"/>
+  <text class="sch-equip-label" x="406" y="358">TX 33/132</text>
+
+  {# Export breaker vertical (360..400) #}
+  <line x1="460" y1="360" x2="460" y2="420" class="sch-connector"/>
+
+  {# Output arrow to grid #}
+  <line x1="460" y1="420" x2="460" y2="450" class="sch-connector"/>
+  <polygon points="454,444 466,444 460,458" class="sch-connector" fill="#94a3b8"/>
+  <text class="sch-equip-label" x="420" y="456">GRID 132 KV</text>
+
+  {# ── Anchor groups ── #}
+
+  {# Incomer A breaker (on the dropper into Bus A) — vertical breaker symbol #}
+  {% set ia = ns.anchor_map.get('incomer_a', {}) %}
+  <g transform="translate(260, 40)">
+    <text class="sch-label" x="14" y="22">{{ ia.get('label', 'INCOMER A') }}</text>
+    <g id="sch-{{ widget.id }}-incomer_a" class="sch-anchor sch-state-off">
+      <line class="sch-connector" x1="0" y1="0" x2="0" y2="40"/>
+      <circle class="sch-equip" cx="0" cy="0" r="3"/>
+      <circle class="sch-equip" cx="0" cy="40" r="3"/>
+      <rect class="sch-equip" x="-6" y="14" width="12" height="12"/>
+    </g>
+  </g>
+
+  {# Incomer B breaker #}
+  {% set ib = ns.anchor_map.get('incomer_b', {}) %}
+  <g transform="translate(660, 40)">
+    <text class="sch-label" x="14" y="22">{{ ib.get('label', 'INCOMER B') }}</text>
+    <g id="sch-{{ widget.id }}-incomer_b" class="sch-anchor sch-state-off">
+      <line class="sch-connector" x1="0" y1="0" x2="0" y2="40"/>
+      <circle class="sch-equip" cx="0" cy="0" r="3"/>
+      <circle class="sch-equip" cx="0" cy="40" r="3"/>
+      <rect class="sch-equip" x="-6" y="14" width="12" height="12"/>
+    </g>
+  </g>
+
+  {# Busbar A energized indicator (short bus segment below Bus A) #}
+  {% set ba = ns.anchor_map.get('busbar_a', {}) %}
+  <g transform="translate(760, 86)">
+    <text class="sch-label" x="0" y="-4">{{ ba.get('label', 'BUS A') }}</text>
+    <g id="sch-{{ widget.id }}-busbar_a" class="sch-anchor sch-state-off">
+      <line class="sch-bus" x1="0" y1="0" x2="40" y2="0"/>
+    </g>
+  </g>
+
+  {# Busbar B energized indicator #}
+  {% set bb = ns.anchor_map.get('busbar_b', {}) %}
+  <g transform="translate(760, 220)">
+    <text class="sch-label" x="0" y="-4">{{ bb.get('label', 'BUS B') }}</text>
+    <g id="sch-{{ widget.id }}-busbar_b" class="sch-anchor sch-state-off">
+      <line class="sch-bus" x1="0" y1="0" x2="40" y2="0"/>
+    </g>
+  </g>
+
+  {# Tie breaker — between buses (vertical, centered on tie line at x=150) #}
+  {% set tb = ns.anchor_map.get('tie_breaker', {}) %}
+  <g transform="translate(150, 115)">
+    <text class="sch-label" x="14" y="22">{{ tb.get('label', 'TIE BRK') }}</text>
+    <g id="sch-{{ widget.id }}-tie_breaker" class="sch-anchor sch-state-off">
+      <line class="sch-connector" x1="0" y1="0" x2="0" y2="40"/>
+      <circle class="sch-equip" cx="0" cy="0" r="3"/>
+      <circle class="sch-equip" cx="0" cy="40" r="3"/>
+      <rect class="sch-equip" x="-6" y="14" width="12" height="12"/>
+    </g>
+  </g>
+
+  {# Transformer primary voltage (right of coils, upper) #}
+  {% set tpv = ns.anchor_map.get('transformer_primary_v', {}) %}
+  <g transform="translate(520, 258)">
+    <g id="sch-{{ widget.id }}-transformer_primary_v" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ tpv.get('label', 'PRI V') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="0" y="23">{{ tpv.get('unit', 'kV') }}</text>
+    </g>
+  </g>
+
+  {# Transformer secondary voltage (right of coils, lower) #}
+  {% set tsv = ns.anchor_map.get('transformer_secondary_v', {}) %}
+  <g transform="translate(520, 310)">
+    <g id="sch-{{ widget.id }}-transformer_secondary_v" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ tsv.get('label', 'SEC V') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="0" y="23">{{ tsv.get('unit', 'kV') }}</text>
+    </g>
+  </g>
+
+  {# Oil temp (right of transformer) #}
+  {% set ot = ns.anchor_map.get('oil_temp', {}) %}
+  <g transform="translate(630, 262)">
+    <g id="sch-{{ widget.id }}-oil_temp" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ ot.get('label', 'OIL TEMP') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="0" y="23">{{ ot.get('unit', '°C') }}</text>
+    </g>
+  </g>
+
+  {# Winding temp #}
+  {% set wt = ns.anchor_map.get('winding_temp', {}) %}
+  <g transform="translate(630, 312)">
+    <g id="sch-{{ widget.id }}-winding_temp" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ wt.get('label', 'WINDING TEMP') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="0" y="23">{{ wt.get('unit', '°C') }}</text>
+    </g>
+  </g>
+
+  {# Tap position — small badge on left of transformer #}
+  {% set tp = ns.anchor_map.get('tap_position', {}) %}
+  <g transform="translate(348, 270)">
+    <g id="sch-{{ widget.id }}-tap_position" class="sch-anchor">
+      <rect class="sch-equip" x="-4" y="-12" width="56" height="42"/>
+      <text class="sch-label" x="2" y="0">{{ tp.get('label', 'TAP') }}</text>
+      <text class="sch-value" x="2" y="14">&#8212;</text>
+      <text class="sch-unit" x="2" y="26">{{ tp.get('unit', '') }}</text>
+    </g>
+  </g>
+
+  {# Export breaker (vertical) — on dropper below transformer #}
+  {% set xb = ns.anchor_map.get('export_breaker', {}) %}
+  <g transform="translate(460, 370)">
+    <text class="sch-label" x="14" y="22">{{ xb.get('label', 'EXPORT BRK') }}</text>
+    <g id="sch-{{ widget.id }}-export_breaker" class="sch-anchor sch-state-off">
+      <line class="sch-connector" x1="0" y1="0" x2="0" y2="40"/>
+      <circle class="sch-equip" cx="0" cy="0" r="3"/>
+      <circle class="sch-equip" cx="0" cy="40" r="3"/>
+      <rect class="sch-equip" x="-6" y="14" width="12" height="12"/>
+    </g>
+  </g>
+
+  {# Export current tile (right) #}
+  {% set xc = ns.anchor_map.get('export_current', {}) %}
+  <rect x="780" y="360" width="140" height="56" class="sch-connector-dashed"/>
+  <g transform="translate(788, 374)">
+    <g id="sch-{{ widget.id }}-export_current" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ xc.get('label', 'EXPORT CURRENT') }}</text>
+      <text class="sch-value" x="0" y="20">&#8212;</text>
+      <text class="sch-unit" x="0" y="32">{{ xc.get('unit', 'A') }}</text>
+    </g>
+  </g>
+</svg>

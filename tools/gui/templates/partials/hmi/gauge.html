@@ -1,0 +1,20 @@
+<div class="hmi-widget hmi-gauge" style="grid-column: span {{ widget.columns }}">
+  <div class="widget-header">{{ widget.title }}</div>
+  {% for tag in widget.tags %}
+  <div class="gauge-display">
+    <svg id="gauge-{{ widget.id }}-{{ loop.index0 }}" viewBox="0 0 200 120" width="200" height="120">
+      <!-- Background arc -->
+      <path d="M 30 100 A 70 70 0 0 1 170 100"
+            fill="none" stroke="#1e293b" stroke-width="12" stroke-linecap="round"/>
+      <!-- Foreground arc -->
+      <path d="M 30 100 A 70 70 0 0 1 170 100"
+            fill="none" stroke="#3b82f6" stroke-width="12" stroke-linecap="round"
+            stroke-dasharray="0 220"/>
+      <!-- Value text -->
+      <text x="100" y="95" text-anchor="middle" font-size="20" font-weight="700"
+            font-family="'JetBrains Mono', monospace" fill="#e2e8f0">&mdash;</text>
+    </svg>
+    <div class="gauge-label">{{ tag.label }}{% if tag.unit %} ({{ tag.unit }}){% endif %}</div>
+  </div>
+  {% endfor %}
+</div>

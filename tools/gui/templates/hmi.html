@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% set active = "home" %}
+{% block title %}Generative HMI{% endblock %}
+{% block content %}
+
+<div class="gen-prompt-card">
+  <div class="prompt-label">&gt; NEW SCREEN <span class="cursor"></span></div>
+  <form hx-post="/api/hmi/generate" hx-target="#gen-result" hx-swap="innerHTML">
+    <fieldset role="group">
+      <textarea name="prompt" rows="3"
+                placeholder="Describe the screen you want to generate, e.g. 'Show me all winch speed and torque data with gauges and a status panel'"
+                required></textarea>
+      <select name="model" class="model-select" id="gen-model" title="Model">
+        <option value="claude-sonnet-4-6">SONNET</option>
+        <option value="claude-opus-4-6">OPUS</option>
+        <option value="claude-haiku-4-5-20251001">HAIKU</option>
+      </select>
+      <button type="submit">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:middle">
+          <path d="M2 8.5L6.5 13L14 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Generate
+      </button>
+    </fieldset>
+  </form>
+  <div id="gen-result"></div>
+</div>
+
+<div class="farm-overview">
+  <div class="farm-overview-head">
+    <span><span class="ovw-pulse"></span>FARM LIVE OVERVIEW</span>
+    <strong>NORDSEA ALPHA</strong>
+  </div>
+  <div id="farm-overview-body"
+       hx-get="/api/hmi/overview"
+       hx-trigger="load, every 2s"
+       hx-swap="innerHTML">
+    <div class="overview-empty">Loading overview...</div>
+  </div>
+</div>
+
+<div class="home-content">
+  <div class="screens-section">
+    <h3>Screens {% if screens %}<span class="count-badge">{{ screens|length }}</span>{% endif %}</h3>
+    {% if screens %}
+    <div class="grid grid-auto">
+      {% for screen in screens %}
+      <a href="/hmi/screen/{{ screen.name }}" class="screen-card">
+        <div class="card-title">{{ screen.title }}</div>
+        <div class="card-desc">{{ screen.description }}</div>
+        <div class="card-footer">
+          <span class="card-meta">{{ screen.widget_count }} widgets · {{ screen.tag_count }} tags</span>
+          <button class="btn-icon btn-delete" onclick="event.preventDefault(); event.stopPropagation(); deleteScreen('{{ screen.name }}', this)" title="Delete screen">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5.33 4V2.67a1.33 1.33 0 011.34-1.34h2.66a1.33 1.33 0 011.34 1.34V4M6.67 7.33v4M9.33 7.33v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3.33 4l.67 9.33a1.33 1.33 0 001.33 1.34h5.34a1.33 1.33 0 001.33-1.34L12.67 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      No saved screens yet — generate one above.
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="catalog-section">
+    <h3>Tag Catalog</h3>
+    <div class="catalog-scroll" id="catalog-container"
+         hx-get="/api/hmi/catalog" hx-trigger="load" hx-swap="innerHTML">
+      <p aria-busy="true">Loading tag catalog...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+async function deleteScreen(name, btn) {
+  if (!confirm('Delete screen "' + name + '"?')) return;
+  const resp = await fetch('/api/hmi/screen/' + name, {method: 'DELETE'});
+  if (resp.ok) {
+    const card = btn.closest('.screen-card');
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+    setTimeout(() => card.remove(), 200);
+  }
+}
+function editScreen(prompt) {
+  const textarea = document.querySelector('.gen-prompt-card textarea');
+  textarea.value = prompt;
+  textarea.focus();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+
+<script>
+(function() {
+  const prompt = sessionStorage.getItem('edit-prompt');
+  if (prompt) {
+    sessionStorage.removeItem('edit-prompt');
+    const textarea = document.querySelector('.gen-prompt-card textarea');
+    if (textarea) {
+      textarea.value = prompt;
+      textarea.focus();
+    }
+  }
+  const sel = document.getElementById('gen-model');
+  if (sel) {
+    const saved = localStorage.getItem('hmi-model');
+    if (saved) sel.value = saved;
+    sel.addEventListener('change', () => localStorage.setItem('hmi-model', sel.value));
+  }
+})();
+</script>
+
+{% endblock %}

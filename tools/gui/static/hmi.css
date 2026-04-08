@@ -1,0 +1,978 @@
+/* ============================================================
+   HMI Widget Styles
+   Widget-specific CSS for the Generative HMI dark theme.
+   Depends on variables defined in hmi-design.css.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   1. HMI Grid & Page Load Animation
+   ---------------------------------------------------------- */
+
+.hmi-grid {
+  gap: var(--hmi-grid-gap);
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hmi-grid > * {
+  animation: fadeSlideUp 0.4s ease-out both;
+}
+/* Stagger delays for first 12 children */
+.hmi-grid > *:nth-child(1) { animation-delay: 0.05s; }
+.hmi-grid > *:nth-child(2) { animation-delay: 0.1s; }
+.hmi-grid > *:nth-child(3) { animation-delay: 0.15s; }
+.hmi-grid > *:nth-child(4) { animation-delay: 0.2s; }
+.hmi-grid > *:nth-child(5) { animation-delay: 0.25s; }
+.hmi-grid > *:nth-child(6) { animation-delay: 0.3s; }
+.hmi-grid > *:nth-child(7) { animation-delay: 0.35s; }
+.hmi-grid > *:nth-child(8) { animation-delay: 0.4s; }
+.hmi-grid > *:nth-child(9) { animation-delay: 0.45s; }
+.hmi-grid > *:nth-child(10) { animation-delay: 0.5s; }
+.hmi-grid > *:nth-child(11) { animation-delay: 0.55s; }
+.hmi-grid > *:nth-child(12) { animation-delay: 0.6s; }
+
+/* ----------------------------------------------------------
+   2. Value Flash Animation
+   ---------------------------------------------------------- */
+
+@keyframes valueFlash {
+  0% { color: var(--hmi-accent-cyan); }
+  100% { color: var(--hmi-text); }
+}
+
+/* ----------------------------------------------------------
+   3. Value Card Widget
+   ---------------------------------------------------------- */
+
+.hmi-value-card .value-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0;
+}
+.hmi-value-card .value-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--hmi-text-dim);
+  margin-bottom: 0.25rem;
+}
+.hmi-value-card .value-number {
+  font-size: 2.5rem;
+  font-weight: 600;
+  font-family: var(--hmi-font-mono);
+  line-height: 1.1;
+  color: var(--hmi-text);
+  animation: valueFlash 0.5s ease-out;
+}
+.hmi-value-card .value-unit {
+  font-size: 0.8rem;
+  color: var(--hmi-text-muted);
+  margin-top: 0.15rem;
+  font-family: var(--hmi-font-mono);
+}
+
+/* ----------------------------------------------------------
+   4. Gauge Widget
+   ---------------------------------------------------------- */
+
+.hmi-gauge {
+  background: var(--hmi-bg-card);
+  border: 1px solid var(--hmi-border);
+  border-top: 2px solid var(--hmi-accent);
+  border-radius: var(--hmi-radius);
+  padding: var(--hmi-card-padding);
+}
+.hmi-gauge header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--hmi-text-muted);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--hmi-border);
+}
+.hmi-gauge .gauge-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+.hmi-gauge .gauge-label {
+  font-size: 0.75rem;
+  color: var(--hmi-text-dim);
+  text-align: center;
+  margin-top: 0.25rem;
+  letter-spacing: 0.05em;
+}
+/* Override hardcoded SVG colors so gauges adapt to theme */
+.hmi-gauge svg path:first-child {
+  stroke: var(--hmi-border) !important;
+}
+.hmi-gauge svg path:nth-child(2) {
+  stroke: var(--hmi-accent) !important;
+}
+.hmi-gauge svg text {
+  fill: var(--hmi-text) !important;
+}
+
+/* ----------------------------------------------------------
+   5. Status Widget
+   ---------------------------------------------------------- */
+
+.hmi-status .status-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--hmi-border);
+}
+.hmi-status .status-row:last-child {
+  border-bottom: none;
+}
+.hmi-status .status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--hmi-border-active);
+  flex-shrink: 0;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.hmi-status .status-dot.on {
+  background: var(--hmi-success);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  animation: dotPulse 2s ease-in-out infinite;
+}
+.hmi-status .status-dot.off {
+  background: var(--hmi-border-active);
+  box-shadow: none;
+}
+@keyframes dotPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(16, 185, 129, 0.3); }
+  50% { box-shadow: 0 0 14px rgba(16, 185, 129, 0.6); }
+}
+.hmi-status .status-label {
+  flex-grow: 1;
+  font-size: 0.85rem;
+  color: var(--hmi-text);
+}
+.hmi-status .status-value {
+  font-family: var(--hmi-font-mono);
+  font-size: 0.85rem;
+  color: var(--hmi-text-muted);
+  animation: valueFlash 0.5s ease-out;
+}
+
+/* ----------------------------------------------------------
+   6. Bar Chart Widget
+   ---------------------------------------------------------- */
+
+.hmi-bar-chart .bar-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0;
+}
+.hmi-bar-chart .bar-label {
+  min-width: 100px;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  color: var(--hmi-text-muted);
+}
+.hmi-bar-chart .bar-track {
+  flex-grow: 1;
+  height: 22px;
+  background: var(--hmi-bg-deep);
+  border: 1px solid var(--hmi-border);
+  border-radius: var(--hmi-radius);
+  overflow: hidden;
+}
+.hmi-bar-chart .bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--hmi-accent), var(--hmi-accent-cyan));
+  border-radius: var(--hmi-radius);
+  transition: width 0.3s ease-out;
+}
+.hmi-bar-chart .bar-value {
+  min-width: 70px;
+  text-align: right;
+  font-family: var(--hmi-font-mono);
+  font-size: 0.85rem;
+  color: var(--hmi-text);
+  flex-shrink: 0;
+  animation: valueFlash 0.5s ease-out;
+}
+
+/* ----------------------------------------------------------
+   7. Table Widget
+   ---------------------------------------------------------- */
+
+.hmi-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.hmi-table thead th {
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--hmi-text-muted);
+  padding: 0.5rem 0.75rem;
+  border-bottom: 2px solid var(--hmi-accent);
+}
+.hmi-table tbody td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--hmi-border);
+  font-size: 0.85rem;
+}
+.hmi-table tbody td:nth-child(2) {
+  font-family: var(--hmi-font-mono);
+  color: var(--hmi-text);
+  animation: valueFlash 0.5s ease-out;
+}
+.hmi-table tbody td:nth-child(3) {
+  color: var(--hmi-text-dim);
+}
+.hmi-table tbody tr:hover {
+  background: var(--hmi-bg-hover);
+}
+
+/* ----------------------------------------------------------
+   8. Generator Prompt Card
+   ---------------------------------------------------------- */
+
+.gen-prompt-card {
+  background: var(--hmi-bg-card);
+  border: 1px solid var(--hmi-border);
+  border-top: 2px solid var(--hmi-accent);
+  border-radius: var(--hmi-radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+.gen-prompt-card .prompt-label {
+  font-family: var(--hmi-font-mono);
+  font-size: 0.8rem;
+  color: var(--hmi-accent);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.gen-prompt-card .prompt-label .cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.1em;
+  background: var(--hmi-accent);
+  animation: cursorBlink 1s step-end infinite;
+}
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.gen-prompt-card textarea {
+  background: var(--hmi-bg-deep);
+  border: 1px solid var(--hmi-border);
+  color: var(--hmi-text);
+  font-family: var(--hmi-font-mono);
+  font-size: 0.9rem;
+  padding: 0.75rem;
+  width: 100%;
+  min-height: 4.5rem;
+  resize: vertical;
+  border-radius: var(--hmi-radius);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.gen-prompt-card textarea:focus {
+  outline: none;
+  border-color: var(--hmi-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+.gen-prompt-card textarea::placeholder {
+  color: var(--hmi-text-dim);
+}
+.gen-prompt-card button[type="submit"] {
+  background: var(--hmi-accent);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  font-family: var(--hmi-font);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: var(--hmi-radius);
+  transition: background 0.2s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.gen-prompt-card button[type="submit"]:hover {
+  background: #4f91f7;
+}
+.gen-prompt-card button[type="submit"]:active {
+  background: #2563eb;
+}
+
+/* ----------------------------------------------------------
+   9. Generation Progress (SSE stream)
+   ---------------------------------------------------------- */
+
+#gen-result {
+  margin-top: 0.75rem;
+}
+#gen-result [sse-connect] {
+  border-left: 3px solid var(--hmi-accent);
+  padding-left: 1rem;
+  animation: progressPulse 1.5s ease-in-out infinite;
+}
+@keyframes progressPulse {
+  0%, 100% { border-left-color: var(--hmi-accent); }
+  50% { border-left-color: var(--hmi-accent-cyan); }
+}
+#gen-result p {
+  color: var(--hmi-text-muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+#gen-result article {
+  margin: 0;
+}
+
+/* ----------------------------------------------------------
+   10. Saved Screens Grid
+   ---------------------------------------------------------- */
+
+.screens-section h3 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--hmi-text-muted);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.screens-section .count-badge {
+  background: var(--hmi-bg-hover);
+  color: var(--hmi-text-dim);
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+  font-family: var(--hmi-font-mono);
+}
+.screen-card {
+  background: var(--hmi-bg-card);
+  border: 1px solid var(--hmi-border);
+  border-left: 3px solid var(--hmi-accent);
+  border-radius: var(--hmi-radius);
+  padding: var(--hmi-card-padding);
+  transition: border-left-color 0.2s, background 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+}
+.screen-card:hover {
+  border-left-color: var(--hmi-accent-cyan);
+  background: var(--hmi-bg-hover);
+}
+.screen-card .card-title {
+  font-weight: 600;
+  color: var(--hmi-text);
+  margin-bottom: 0.35rem;
+}
+.screen-card .card-desc {
+  font-size: 0.8rem;
+  color: var(--hmi-text-muted);
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.screen-card .card-meta {
+  font-size: 0.7rem;
+  color: var(--hmi-text-dim);
+  font-family: var(--hmi-font-mono);
+}
+.empty-state {
+  border: 2px dashed var(--hmi-border-active);
+  border-radius: var(--hmi-radius);
+  padding: 2rem;
+  text-align: center;
+  color: var(--hmi-text-dim);
+  font-size: 0.85rem;
+}
+
+/* ----------------------------------------------------------
+   11. Tag Catalog Section
+   ---------------------------------------------------------- */
+
+.catalog-section h3 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--hmi-text-muted);
+  margin-bottom: 1rem;
+}
+.catalog-section .catalog-scroll {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.catalog-section .catalog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+.catalog-section .catalog-header small {
+  color: var(--hmi-text-dim);
+}
+.catalog-section h5 {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--hmi-accent);
+  margin: 1rem 0 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--hmi-border);
+}
+
+/* ----------------------------------------------------------
+   12. Screen Display Page
+   ---------------------------------------------------------- */
+
+.screen-header {
+  margin-bottom: 1.5rem;
+}
+.screen-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--hmi-text);
+  margin-bottom: 0.25rem;
+}
+.screen-header p {
+  color: var(--hmi-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+.screen-header .screen-meta {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.7rem;
+  font-family: var(--hmi-font-mono);
+  color: var(--hmi-text-dim);
+}
+.screen-header .back-link {
+  font-size: 0.8rem;
+  color: var(--hmi-text-muted);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+.screen-header .back-link:hover {
+  color: var(--hmi-accent);
+}
+
+/* ----------------------------------------------------------
+   13. Home Page Layout
+   ---------------------------------------------------------- */
+
+.home-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .home-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ----------------------------------------------------------
+   14. Responsive
+   ---------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .hmi-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .hmi-value-card .value-number {
+    font-size: 2rem;
+  }
+  .gen-prompt-card {
+    padding: 1rem;
+  }
+}
+
+/* ── Delete button ── */
+.btn-icon {
+  background: none;
+  border: none;
+  color: var(--hmi-text-dim);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--hmi-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, background 0.2s;
+}
+
+.btn-icon:hover {
+  color: var(--hmi-danger);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.screen-card .card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.screen-card {
+  transition: border-left-color 0.2s, background 0.2s, opacity 0.2s, transform 0.2s;
+}
+
+/* ── Screen actions bar ── */
+.screen-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.screen-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-action {
+  background: var(--hmi-bg-hover);
+  border: 1px solid var(--hmi-border);
+  color: var(--hmi-text-muted);
+  padding: 0.35rem 0.75rem;
+  font-family: var(--hmi-font);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--hmi-radius);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-action:hover {
+  border-color: var(--hmi-accent);
+  color: var(--hmi-text);
+}
+
+.btn-action.active {
+  background: var(--hmi-accent);
+  border-color: var(--hmi-accent);
+  color: #fff;
+}
+
+.btn-action.btn-danger:hover {
+  border-color: var(--hmi-danger);
+  color: var(--hmi-danger);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── Edit mode (drag-drop + resize) ── */
+.hmi-grid.edit-mode .hmi-widget {
+  cursor: grab;
+  position: relative;
+  outline: 1px dashed var(--hmi-border-active);
+  outline-offset: -1px;
+}
+
+.hmi-grid.edit-mode .hmi-widget:hover {
+  outline-color: var(--hmi-accent);
+}
+
+.hmi-widget.dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+
+.hmi-widget.drag-over {
+  outline: 2px solid var(--hmi-accent) !important;
+  outline-offset: -2px;
+}
+
+.resize-controls {
+  position: absolute;
+  bottom: 0.35rem;
+  right: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--hmi-bg-deep);
+  border: 1px solid var(--hmi-border-active);
+  border-radius: var(--hmi-radius);
+  padding: 0.15rem 0.35rem;
+}
+
+.btn-resize {
+  background: none;
+  border: none;
+  color: var(--hmi-text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+
+.btn-resize:hover:not(:disabled) {
+  color: var(--hmi-accent);
+}
+
+.btn-resize:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.resize-label {
+  font-size: 0.65rem;
+  font-family: var(--hmi-font-mono);
+  color: var(--hmi-text-dim);
+  min-width: 3ch;
+  text-align: center;
+}
+
+/* ── Sparklines ── */
+.sparkline-container {
+  margin-top: 0.25rem;
+  height: 20px;
+  width: 100%;
+  opacity: 0.6;
+}
+
+.sparkline-container svg {
+  width: 100%;
+  height: 100%;
+}
+
+.sparkline-line {
+  fill: none;
+  stroke: var(--hmi-accent);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.sparkline-area {
+  fill: var(--hmi-accent);
+  opacity: 0.1;
+}
+
+/* ==========================================================
+   NEW WIDGET TYPES
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   15. Trend Chart Widget
+   ---------------------------------------------------------- */
+
+.hmi-trend-chart .trend-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--hmi-radius);
+  border: 1px solid var(--hmi-border);
+}
+
+.hmi-trend-chart .trend-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--hmi-border);
+}
+
+.hmi-trend-chart .trend-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--hmi-text-muted);
+}
+
+.hmi-trend-chart .trend-val {
+  font-family: var(--hmi-font-mono);
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--hmi-text);
+  animation: valueFlash 0.5s ease-out;
+}
+
+/* ----------------------------------------------------------
+   16. Alarm List Widget
+   ---------------------------------------------------------- */
+
+.hmi-alarm-list .alarm-container {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.hmi-alarm-list .alarm-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--hmi-border);
+  transition: background 0.2s;
+}
+
+.hmi-alarm-list .alarm-row:last-child {
+  border-bottom: none;
+}
+
+.hmi-alarm-list .alarm-row.alarm-active {
+  background: rgba(239, 68, 68, 0.06);
+  border-left: 3px solid var(--hmi-danger);
+  padding-left: 0.5rem;
+}
+
+.hmi-alarm-list .alarm-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--hmi-border-active);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.hmi-alarm-list .alarm-dot-critical {
+  background: var(--hmi-danger);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  animation: dotPulse-danger 1.5s ease-in-out infinite;
+}
+
+.hmi-alarm-list .alarm-dot-warning {
+  background: var(--hmi-warning);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+  animation: dotPulse-warning 2s ease-in-out infinite;
+}
+
+.hmi-alarm-list .alarm-dot-info {
+  background: var(--hmi-accent-cyan);
+  box-shadow: 0 0 6px rgba(6, 182, 212, 0.3);
+}
+
+.hmi-alarm-list .alarm-dot-ok {
+  background: var(--hmi-border-active);
+  box-shadow: none;
+}
+
+@keyframes dotPulse-danger {
+  0%, 100% { box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 0 16px rgba(239, 68, 68, 0.7); }
+}
+
+@keyframes dotPulse-warning {
+  0%, 100% { box-shadow: 0 0 6px rgba(245, 158, 11, 0.3); }
+  50% { box-shadow: 0 0 14px rgba(245, 158, 11, 0.6); }
+}
+
+.hmi-alarm-list .alarm-label {
+  flex-grow: 1;
+  font-size: 0.85rem;
+  color: var(--hmi-text);
+}
+
+.hmi-alarm-list .alarm-status {
+  font-family: var(--hmi-font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-width: 55px;
+  text-align: center;
+  animation: valueFlash 0.5s ease-out;
+}
+
+.hmi-alarm-list .alarm-active .alarm-status {
+  color: var(--hmi-danger);
+}
+
+.hmi-alarm-list .alarm-time {
+  font-family: var(--hmi-font-mono);
+  font-size: 0.7rem;
+  color: var(--hmi-text-dim);
+  min-width: 50px;
+  text-align: right;
+}
+
+/* ----------------------------------------------------------
+   17. Command Widget
+   ---------------------------------------------------------- */
+
+.hmi-command .cmd-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.hmi-command .cmd-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.hmi-command .cmd-btn {
+  width: 100%;
+  padding: 0.6rem 0.5rem;
+  background: var(--hmi-bg-hover);
+  border: 1px solid var(--hmi-border-active);
+  color: var(--hmi-text);
+  font-family: var(--hmi-font);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border-radius: var(--hmi-radius);
+  transition: all 0.15s;
+}
+
+.hmi-command .cmd-btn:hover {
+  background: var(--hmi-accent);
+  border-color: var(--hmi-accent);
+  color: #fff;
+}
+
+.hmi-command .cmd-btn:active {
+  transform: scale(0.97);
+}
+
+.hmi-command .cmd-btn-danger {
+  border-color: var(--hmi-danger);
+  color: var(--hmi-danger);
+}
+
+.hmi-command .cmd-btn-danger:hover {
+  background: var(--hmi-danger);
+  border-color: var(--hmi-danger);
+  color: #fff;
+}
+
+.hmi-command .cmd-status {
+  font-family: var(--hmi-font-mono);
+  font-size: 0.7rem;
+  color: var(--hmi-text-dim);
+}
+
+.hmi-command .cmd-on {
+  color: var(--hmi-success);
+}
+
+.hmi-command .cmd-off {
+  color: var(--hmi-text-dim);
+}
+
+/* Command confirmation modal */
+.cmd-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  align-items: center;
+  justify-content: center;
+}
+
+.cmd-modal.active {
+  display: flex;
+}
+
+.cmd-modal-content {
+  background: var(--hmi-bg-card);
+  border: 1px solid var(--hmi-border-active);
+  border-radius: var(--hmi-radius);
+  padding: 1.5rem;
+  min-width: 300px;
+  text-align: center;
+}
+
+.cmd-modal-wide {
+  max-width: 520px;
+  min-width: 380px;
+  text-align: left;
+}
+
+.cmd-modal-content p {
+  font-size: 0.95rem;
+  color: var(--hmi-text);
+  margin-bottom: 1.25rem;
+  font-family: var(--hmi-font-mono);
+}
+
+.cmd-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.cmd-modal .cmd-confirm {
+  background: var(--hmi-accent);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  font-family: var(--hmi-font);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border-radius: var(--hmi-radius);
+  transition: background 0.15s;
+}
+
+.cmd-modal .cmd-confirm:hover {
+  background: #2563eb;
+}
+
+.cmd-modal .cmd-cancel {
+  background: var(--hmi-bg-hover);
+  color: var(--hmi-text-muted);
+  border: 1px solid var(--hmi-border);
+  padding: 0.5rem 1.25rem;
+  font-family: var(--hmi-font);
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border-radius: var(--hmi-radius);
+  transition: all 0.15s;
+}
+
+.cmd-modal .cmd-cancel:hover {
+  border-color: var(--hmi-text-dim);
+  color: var(--hmi-text);
+}
+

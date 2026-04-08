@@ -1,0 +1,12 @@
+{
+  "plc_name": "NordseaAlpha",
+  "opcua_endpoints": [
+    {"name": "WTG01", "endpoint": "opc.tcp://127.0.0.1:4841"},
+    {"name": "WTG02", "endpoint": "opc.tcp://127.0.0.1:4842"},
+    {"name": "WTG03", "endpoint": "opc.tcp://127.0.0.1:4843"},
+    {"name": "WTG04", "endpoint": "opc.tcp://127.0.0.1:4844"},
+    {"name": "SUB01", "endpoint": "opc.tcp://127.0.0.1:4845"},
+    {"name": "MET01", "endpoint": "opc.tcp://127.0.0.1:4846"},
+    {"name": "SCADA", "endpoint": "opc.tcp://127.0.0.1:4847"}
+  ]
+}

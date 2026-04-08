@@ -1,0 +1,12 @@
+<div class="hmi-widget hmi-bar-chart" style="grid-column: span {{ widget.columns }}">
+  <div class="widget-header">{{ widget.title }}</div>
+  {% for tag in widget.tags %}
+  <div class="bar-row">
+    <span class="bar-label">{{ tag.label }}</span>
+    <div class="bar-track">
+      <div class="bar-fill" id="bar-{{ widget.id }}-{{ loop.index0 }}" style="width: 0%"></div>
+    </div>
+    <span class="bar-value" id="val-{{ widget.id }}-{{ loop.index0 }}">&mdash;{% if tag.unit %} {{ tag.unit }}{% endif %}</span>
+  </div>
+  {% endfor %}
+</div>

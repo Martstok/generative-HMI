@@ -1,0 +1,10 @@
+<div class="hmi-widget hmi-status" style="grid-column: span {{ widget.columns }}">
+  <div class="widget-header">{{ widget.title }}</div>
+  {% for tag in widget.tags %}
+  <div class="status-row">
+    <div class="status-dot" id="dot-{{ widget.id }}-{{ loop.index0 }}"></div>
+    <span class="status-label">{{ tag.label }}</span>
+    <span class="status-value text-mono" id="val-{{ widget.id }}-{{ loop.index0 }}">&mdash;</span>
+  </div>
+  {% endfor %}
+</div>

@@ -1,0 +1,21 @@
+<div class="hmi-widget hmi-table" style="grid-column: span {{ widget.columns }}">
+  <div class="widget-header">{{ widget.title }}</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Tag</th>
+        <th>Value</th>
+        <th>Unit</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tag in widget.tags %}
+      <tr>
+        <td>{{ tag.label }}</td>
+        <td id="val-{{ widget.id }}-{{ loop.index0 }}">&mdash;</td>
+        <td class="text-muted">{{ tag.unit }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

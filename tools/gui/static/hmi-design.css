@@ -1,0 +1,1034 @@
+/* ==========================================================================
+   HMI Design System — "Precision Command"
+   Industrial control room meets AI command interface.
+   Dark theme. Data is the hero. Sharp, not rounded. Dense but breathable.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. CSS Custom Properties
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* Backgrounds */
+  --hmi-bg-deep:       #0a0e17;
+  --hmi-bg-surface:    #111827;
+  --hmi-bg-card:       #1a2234;
+  --hmi-bg-hover:      #232d42;
+
+  /* Accent & semantic colors */
+  --hmi-accent:        #3b82f6;
+  --hmi-accent-cyan:   #06b6d4;
+  --hmi-success:       #10b981;
+  --hmi-warning:       #f59e0b;
+  --hmi-danger:        #ef4444;
+
+  /* Text hierarchy */
+  --hmi-text:          #e2e8f0;
+  --hmi-text-muted:    #94a3b8;
+  --hmi-text-dim:      #64748b;
+
+  /* Borders */
+  --hmi-border:        #1e293b;
+  --hmi-border-active: #334155;
+
+  /* Typography */
+  --hmi-font:          'Instrument Sans', system-ui, sans-serif;
+  --hmi-font-mono:     'JetBrains Mono', monospace;
+
+  /* Spacing & shape */
+  --hmi-radius:        2px;
+  --hmi-card-padding:  1.25rem;
+  --hmi-grid-gap:      0.75rem;
+}
+
+
+/* --------------------------------------------------------------------------
+   2. CSS Reset (minimal, dark-focused)
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--hmi-bg-deep);
+  color: var(--hmi-text);
+  font-family: var(--hmi-font);
+  line-height: 1.6;
+  background-image:
+    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+img,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+
+/* --------------------------------------------------------------------------
+   3. Typography
+   -------------------------------------------------------------------------- */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--hmi-font);
+  font-weight: 600;
+  color: var(--hmi-text);
+  margin-bottom: 0.5rem;
+  line-height: 1.25;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.1rem; }
+h5 { font-size: 1rem; }
+h6 { font-size: 0.875rem; }
+
+p {
+  margin-bottom: 1rem;
+  color: var(--hmi-text);
+}
+
+small {
+  color: var(--hmi-text-dim);
+  font-size: 0.85rem;
+}
+
+strong {
+  font-weight: 600;
+}
+
+code {
+  font-family: var(--hmi-font-mono);
+  background: var(--hmi-bg-card);
+  padding: 0.15em 0.4em;
+  border-radius: 2px;
+  font-size: 0.9em;
+}
+
+a {
+  color: var(--hmi-accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--hmi-accent-cyan);
+}
+
+.text-mono  { font-family: var(--hmi-font-mono); }
+.text-muted { color: var(--hmi-text-muted); }
+
+
+/* --------------------------------------------------------------------------
+   4. Navigation
+   -------------------------------------------------------------------------- */
+
+.hmi-nav {
+  background: var(--hmi-bg-surface);
+  border-bottom: 1px solid var(--hmi-border);
+  padding: 0.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hmi-nav .brand {
+  font-family: var(--hmi-font);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--hmi-text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hmi-nav .brand::before {
+  content: '\25C6';           /* ◆ */
+  color: var(--hmi-accent);
+  font-size: 0.7rem;
+}
+
+.hmi-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.hmi-nav a {
+  color: var(--hmi-text-muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.hmi-nav a:hover,
+.hmi-nav a.active {
+  color: var(--hmi-text);
+}
+
+
+/* --------------------------------------------------------------------------
+   5. Layout
+   -------------------------------------------------------------------------- */
+
+.hmi-main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: calc(100vh - 120px);
+}
+
+.hmi-footer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--hmi-border);
+  color: var(--hmi-text-dim);
+  font-size: 0.8rem;
+}
+
+
+/* --------------------------------------------------------------------------
+   6. Card / Widget Base
+   -------------------------------------------------------------------------- */
+
+.hmi-widget {
+  background: var(--hmi-bg-card);
+  border: 1px solid var(--hmi-border);
+  border-top: 2px solid var(--hmi-accent);
+  border-radius: var(--hmi-radius);
+  padding: var(--hmi-card-padding);
+}
+
+.widget-header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--hmi-text-muted);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--hmi-border);
+}
+
+
+/* --------------------------------------------------------------------------
+   7. Form Elements
+   -------------------------------------------------------------------------- */
+
+textarea,
+input[type="text"],
+select {
+  background: var(--hmi-bg-deep);
+  border: 1px solid var(--hmi-border);
+  color: var(--hmi-text);
+  font-family: var(--hmi-font-mono);
+  padding: 0.75rem;
+  border-radius: 2px;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea {
+  resize: vertical;
+}
+
+textarea:focus,
+input[type="text"]:focus,
+select:focus {
+  border-color: var(--hmi-accent);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+button {
+  background: var(--hmi-accent);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  font-family: var(--hmi-font);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #4f91f7;
+}
+
+button:active {
+  background: #2563eb;
+}
+
+button.outline {
+  background: transparent;
+  border: 1px solid var(--hmi-border-active);
+  color: var(--hmi-text-muted);
+}
+
+button.outline:hover {
+  border-color: var(--hmi-accent);
+  color: var(--hmi-text);
+}
+
+button.sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+fieldset[role="group"] {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+
+/* --------------------------------------------------------------------------
+   8. Table Styles
+   -------------------------------------------------------------------------- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+thead th {
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--hmi-text-muted);
+  padding: 0.5rem 0.75rem;
+  border-bottom: 2px solid var(--hmi-accent);
+}
+
+tbody td {
+  padding: 0.5rem 0.75rem;
+  color: var(--hmi-text);
+  border-bottom: 1px solid var(--hmi-border);
+}
+
+tbody tr:hover {
+  background: var(--hmi-bg-hover);
+}
+
+
+/* --------------------------------------------------------------------------
+   9. Loading Spinner
+   -------------------------------------------------------------------------- */
+
+.loading-dots::after {
+  content: '\00B7\00B7\00B7';
+  animation: loadingDots 1.5s steps(4, end) infinite;
+}
+
+@keyframes loadingDots {
+  0%  { content: ''; }
+  25% { content: '\00B7'; }
+  50% { content: '\00B7\00B7'; }
+  75% { content: '\00B7\00B7\00B7'; }
+}
+
+/* Fallback: pulsing spinner for aria-busy elements */
+[aria-busy="true"] {
+  color: var(--hmi-text-muted);
+}
+
+[aria-busy="true"]::before {
+  content: '';
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid var(--hmi-border-active);
+  border-top-color: var(--hmi-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+/* --------------------------------------------------------------------------
+   10. Scrollbar Styling
+   -------------------------------------------------------------------------- */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--hmi-bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--hmi-border-active);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--hmi-text-dim);
+}
+
+
+/* --------------------------------------------------------------------------
+   11. Grid Utilities
+   -------------------------------------------------------------------------- */
+
+.grid      { display: grid; gap: var(--hmi-grid-gap); }
+.grid-2    { grid-template-columns: repeat(2, 1fr); }
+.grid-3    { grid-template-columns: repeat(3, 1fr); }
+.grid-auto { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+
+/* --------------------------------------------------------------------------
+   12. Article / Card Generic
+   -------------------------------------------------------------------------- */
+
+article {
+  background: var(--hmi-bg-card);
+  border: 1px solid var(--hmi-border);
+  border-radius: var(--hmi-radius);
+  padding: var(--hmi-card-padding);
+}
+
+article header {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--hmi-border);
+}
+
+article header a {
+  color: var(--hmi-text);
+}
+
+article header a:hover {
+  color: var(--hmi-accent);
+}
+
+
+/* --------------------------------------------------------------------------
+   13. Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .hmi-main {
+    padding: 1rem;
+  }
+
+  .hmi-nav {
+    padding: 0.75rem 1rem;
+  }
+
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .hmi-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  fieldset[role="group"] {
+    flex-direction: column;
+  }
+}
+
+/* ── Theme toggle & light theme ── */
+[data-theme="light"] {
+  --hmi-bg-deep: #f0f2f5;
+  --hmi-bg-surface: #ffffff;
+  --hmi-bg-card: #ffffff;
+  --hmi-bg-hover: #f5f7fa;
+  --hmi-accent: #2563eb;
+  --hmi-accent-cyan: #0891b2;
+  --hmi-success: #059669;
+  --hmi-warning: #d97706;
+  --hmi-danger: #dc2626;
+  --hmi-text: #1e293b;
+  --hmi-text-muted: #64748b;
+  --hmi-text-dim: #94a3b8;
+  --hmi-border: #e2e8f0;
+  --hmi-border-active: #cbd5e1;
+  --hmi-gauge-bg: #e2e8f0;
+  --hmi-gauge-fg: #2563eb;
+}
+
+[data-theme="light"] body {
+  background-image: linear-gradient(rgba(37,99,235,0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(37,99,235,0.04) 1px, transparent 1px);
+}
+
+/* Nav right section */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-right ul {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--hmi-border);
+  color: var(--hmi-text-muted);
+  padding: 0.35rem;
+  cursor: pointer;
+  border-radius: var(--hmi-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, border-color 0.2s;
+  width: 32px;
+  height: 32px;
+}
+
+.theme-toggle:hover {
+  color: var(--hmi-text);
+  border-color: var(--hmi-border-active);
+}
+
+/* Show sun in dark mode, moon in light mode */
+.icon-moon { display: none; }
+[data-theme="light"] .icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: block; }
+
+/* OPC UA connection status */
+.conn-status {
+  font-size: 0.75rem;
+  transition: color 0.3s;
+}
+
+.conn-status.connected {
+  color: var(--hmi-success);
+  text-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+.conn-status.partial {
+  color: var(--hmi-warning, #f59e0b);
+  text-shadow: 0 0 6px rgba(245, 158, 11, 0.35);
+}
+
+.conn-status.disconnected {
+  color: var(--hmi-danger);
+  text-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
+}
+
+#opcua-status {
+  display: flex;
+  align-items: center;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Farm Live Overview (home page dashboard)
+   ══════════════════════════════════════════════════════════════════════ */
+.farm-overview {
+  margin: 1.5rem 0 2rem;
+  padding: 1.25rem 1.25rem 1rem;
+  background: var(--hmi-bg-card, #111827);
+  border: 1px solid var(--hmi-border, #1f2937);
+  border-radius: 4px;
+  position: relative;
+}
+
+.farm-overview::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    var(--hmi-accent) 0%,
+    var(--hmi-accent-cyan) 50%,
+    transparent 100%);
+}
+
+.farm-overview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--hmi-text-muted, #64748b);
+}
+.farm-overview-head strong {
+  color: var(--hmi-text, #e2e8f0);
+  letter-spacing: 0.2em;
+}
+.farm-overview-head .ovw-pulse {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--hmi-success);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  margin-right: 0.4rem;
+  animation: ovwPulse 2s ease-in-out infinite;
+}
+@keyframes ovwPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Hero tile row */
+.ovw-hero {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.ovw-tile {
+  padding: 0.85rem 1rem 0.75rem;
+  background: var(--hmi-bg, #0d1117);
+  border: 1px solid var(--hmi-border, #1f2937);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+.ovw-tile-primary {
+  border-color: var(--hmi-accent);
+  background: linear-gradient(180deg,
+    rgba(59, 130, 246, 0.08) 0%,
+    var(--hmi-bg, #0d1117) 100%);
+}
+.ovw-tile-primary::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0;
+  width: 40px; height: 40px;
+  background: radial-gradient(circle at top right,
+    rgba(59, 130, 246, 0.25), transparent 70%);
+  pointer-events: none;
+}
+.ovw-tile-val {
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--hmi-text, #e2e8f0);
+  letter-spacing: -0.02em;
+}
+.ovw-tile-primary .ovw-tile-val { color: var(--hmi-accent); }
+.ovw-tile-frac {
+  font-size: 1.1rem;
+  color: var(--hmi-text-muted, #64748b);
+  font-weight: 500;
+}
+.ovw-tile-unit {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--hmi-text-muted, #64748b);
+  margin-top: 0.1rem;
+  letter-spacing: 0.05em;
+}
+.ovw-tile-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--hmi-text-muted, #64748b);
+  margin-top: 0.5rem;
+  text-transform: uppercase;
+}
+.ovw-tile-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--hmi-text-muted, #64748b);
+  margin-top: 0.15rem;
+  opacity: 0.75;
+}
+
+/* Turbine strip */
+.ovw-turbines {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.ovw-turbine {
+  padding: 0.6rem 0.75rem 0.55rem;
+  background: var(--hmi-bg, #0d1117);
+  border: 1px solid var(--hmi-border, #1f2937);
+  border-left: 2px solid var(--hmi-text-muted, #64748b);
+  border-radius: 2px;
+  transition: border-color 0.3s;
+}
+.ovw-turbine-running { border-left-color: var(--hmi-success); }
+.ovw-turbine-fault   { border-left-color: var(--hmi-danger); }
+.ovw-turbine-idle    { border-left-color: var(--hmi-text-muted, #64748b); }
+
+.ovw-turbine-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ovw-turbine-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--hmi-text, #e2e8f0);
+}
+.ovw-turbine-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--hmi-text-muted, #64748b);
+}
+.ovw-turbine-running .ovw-turbine-dot {
+  background: var(--hmi-success);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+}
+.ovw-turbine-fault .ovw-turbine-dot {
+  background: var(--hmi-danger);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+  animation: ovwPulse 1.5s ease-in-out infinite;
+}
+.ovw-turbine-power {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--hmi-text, #e2e8f0);
+  margin-top: 0.3rem;
+  line-height: 1;
+}
+.ovw-turbine-power span {
+  font-size: 0.65rem;
+  color: var(--hmi-text-muted, #64748b);
+  font-weight: 400;
+  margin-left: 0.15rem;
+}
+.ovw-turbine-bar {
+  height: 3px;
+  background: var(--hmi-border, #1f2937);
+  border-radius: 2px;
+  margin-top: 0.45rem;
+  overflow: hidden;
+}
+.ovw-turbine-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--hmi-accent), var(--hmi-accent-cyan));
+  transition: width 0.6s ease-out;
+}
+.ovw-turbine-fault .ovw-turbine-fill { background: var(--hmi-danger); }
+.ovw-turbine-idle .ovw-turbine-fill { background: var(--hmi-text-muted, #64748b); }
+.ovw-turbine-state {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  color: var(--hmi-text-muted, #64748b);
+  margin-top: 0.35rem;
+  text-transform: uppercase;
+}
+.ovw-turbine-running .ovw-turbine-state { color: var(--hmi-success); }
+.ovw-turbine-fault .ovw-turbine-state { color: var(--hmi-danger); }
+
+/* Footer chip row */
+.ovw-footer {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--hmi-border, #1f2937);
+}
+.ovw-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--hmi-text, #e2e8f0);
+  padding: 0.25rem 0.55rem;
+  background: var(--hmi-bg, #0d1117);
+  border: 1px solid var(--hmi-border, #1f2937);
+  border-radius: 2px;
+}
+.ovw-chip-label {
+  color: var(--hmi-text-muted, #64748b);
+  letter-spacing: 0.1em;
+  margin-right: 0.35rem;
+  font-size: 0.6rem;
+}
+.overview-empty {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--hmi-text-muted, #64748b);
+  text-align: center;
+  padding: 1rem;
+}
+
+@media (max-width: 900px) {
+  .ovw-hero, .ovw-turbines { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+/* --------------------------------------------------------------------------
+   Schematic widget — technical poster aesthetic
+   -------------------------------------------------------------------------- */
+
+.hmi-schematic {
+  position: relative;
+  background: #0b1320;
+  border: 1px solid var(--hmi-border);
+  padding: 1.25rem;
+  font-family: var(--hmi-font-mono);
+}
+
+.hmi-schematic::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--hmi-accent);
+}
+
+.sch-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sch-title {
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  color: var(--hmi-text);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.sch-diagram-key {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.6rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--hmi-accent);
+  color: var(--hmi-accent);
+  background: transparent;
+  border-radius: 2px;
+  font-family: var(--hmi-font-mono);
+}
+
+.sch-canvas {
+  position: relative;
+  width: 100%;
+  background-image:
+    linear-gradient(var(--hmi-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hmi-border) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: -1px -1px;
+}
+
+.sch-canvas svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  position: relative;
+}
+
+/* Symbol primitives */
+.sch-equip {
+  fill: none;
+  stroke: var(--hmi-accent);
+  stroke-width: 1.5;
+}
+
+.sch-equip-label {
+  font-family: var(--hmi-font-mono);
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  fill: var(--hmi-text-muted);
+}
+
+.sch-bus {
+  fill: none;
+  stroke: var(--hmi-accent-cyan);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.sch-connector {
+  fill: none;
+  stroke: var(--hmi-text-muted);
+  stroke-width: 1;
+}
+
+.sch-connector-dashed {
+  fill: none;
+  stroke: var(--hmi-text-muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+.sch-label {
+  font-family: var(--hmi-font-mono);
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  fill: var(--hmi-text-muted);
+}
+
+.sch-value {
+  font-family: var(--hmi-font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  fill: var(--hmi-text);
+}
+
+.sch-unit {
+  font-family: var(--hmi-font-mono);
+  font-size: 0.5rem;
+  fill: var(--hmi-text-muted);
+}
+
+/* Boolean state classes on <g> */
+.sch-state-on .sch-equip,
+.sch-state-on .sch-connector,
+.sch-state-on .sch-bus {
+  stroke: var(--hmi-success);
+  filter: drop-shadow(0 0 2px var(--hmi-success));
+}
+
+.sch-state-on .sch-equip {
+  stroke-width: 2;
+}
+
+.sch-state-off .sch-equip,
+.sch-state-off .sch-connector,
+.sch-state-off .sch-bus {
+  stroke: var(--hmi-text-muted);
+}
+
+.sch-state-fault .sch-equip {
+  stroke: var(--hmi-danger);
+  animation: schPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes schPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+.sch-turbine-link { cursor: pointer; transition: filter 0.15s; }
+.sch-turbine-link:hover { filter: brightness(1.6) drop-shadow(0 0 4px var(--hmi-accent)); }
+.sch-turbine-link:hover .sch-equip { stroke: var(--hmi-accent-cyan); }
+
+.sch-missing {
+  padding: 2rem;
+  color: var(--hmi-text-muted);
+  text-align: center;
+  font-family: var(--hmi-font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ----------------------------------------------------------
+   Alarm acknowledgment
+   ---------------------------------------------------------- */
+.alarm-ack-btn {
+  font-family: var(--hmi-font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.6rem;
+  background: transparent;
+  color: var(--hmi-accent);
+  border: 1px solid var(--hmi-accent);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-left: auto;
+}
+.alarm-ack-btn:hover {
+  background: var(--hmi-accent);
+  color: var(--hmi-bg);
+}
+.alarm-row.alarm-acked {
+  opacity: 0.55;
+}
+.alarm-row.alarm-acked .alarm-dot {
+  box-shadow: none;
+  animation: none;
+}
+.alarm-ack-time {
+  font-family: var(--hmi-font-mono);
+  font-size: 0.65rem;
+  color: var(--hmi-text-muted);
+  font-style: italic;
+  margin-left: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Model selector — compact industrial dropdown used by prompt dialogues
+   -------------------------------------------------------------------------- */
+.model-select {
+  font-family: var(--hmi-font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.4rem 1.5rem 0.4rem 0.6rem;
+  background-color: var(--hmi-bg);
+  color: var(--hmi-text);
+  border: 1px solid var(--hmi-border);
+  border-radius: 2px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  transition: border-color 0.15s;
+}
+.model-select:hover,
+.model-select:focus {
+  border-color: var(--hmi-accent);
+  outline: none;
+}
+.model-select option {
+  background: var(--hmi-bg-card, #111827);
+  color: var(--hmi-text);
+  font-family: var(--hmi-font-mono);
+}

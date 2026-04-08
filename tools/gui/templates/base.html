@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Generative HMI{% endblock %}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/hmi-design.css">
+  <link rel="stylesheet" href="/static/hmi.css">
+  <script src="/static/htmx.min.js"></script>
+  <script src="/static/htmx-sse.js"></script>
+</head>
+<body>
+  <nav class="hmi-nav">
+    <a href="/" class="brand">Generative HMI</a>
+    <div class="nav-right">
+      <div id="opcua-status" hx-get="/api/hmi/opcua-status" hx-trigger="load, every 10s" hx-swap="innerHTML" title="OPC UA status"></div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.9 10.4A6 6 0 015.6 2.1 6 6 0 1013.9 10.4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <ul>
+        <li><a href="/" {% if active == "home" %}class="active"{% endif %}>Home</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="hmi-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="hmi-footer">
+    <small>Generative HMI — AI-powered PLC monitoring screens</small>
+  </footer>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('hmi-theme', next);
+    }
+    // Restore saved theme
+    (function() {
+      const saved = localStorage.getItem('hmi-theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+</body>
+</html>

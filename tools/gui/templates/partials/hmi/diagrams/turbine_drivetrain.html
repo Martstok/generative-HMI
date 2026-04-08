@@ -1,0 +1,157 @@
+{# turbine_drivetrain — rotor→gearbox→generator→converter→transformer chain (1000 x 340) #}
+<svg viewBox="0 0 1000 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Turbine drivetrain diagram">
+  {# ── Top strip: ambient pills ── #}
+  {# nacelle_temp pill #}
+  {% set nt = ns.anchor_map.get('nacelle_temp', {}) %}
+  <rect x="140" y="20" width="160" height="44" rx="22" class="sch-equip"/>
+  <g transform="translate(156, 36)">
+    <g id="sch-{{ widget.id }}-nacelle_temp" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ nt.get('label', 'NACELLE TEMP') }}</text>
+      <text class="sch-value" x="0" y="16">&#8212;</text>
+      <text class="sch-unit" x="80" y="16">{{ nt.get('unit', '°C') }}</text>
+    </g>
+  </g>
+
+  {# yaw_position pill #}
+  {% set yp = ns.anchor_map.get('yaw_position', {}) %}
+  <rect x="540" y="20" width="160" height="44" rx="22" class="sch-equip"/>
+  <g transform="translate(556, 36)">
+    <g id="sch-{{ widget.id }}-yaw_position" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ yp.get('label', 'YAW POSITION') }}</text>
+      <text class="sch-value" x="0" y="16">&#8212;</text>
+      <text class="sch-unit" x="80" y="16">{{ yp.get('unit', '°') }}</text>
+    </g>
+  </g>
+
+  {# ── Wind indicator (x=30) ── #}
+  {% set ws = ns.anchor_map.get('wind_speed', {}) %}
+  <g transform="translate(16, 100)">
+    <line x1="0" y1="10" x2="40" y2="10" class="sch-connector"/>
+    <polygon points="36,6 44,10 36,14" class="sch-connector" fill="#94a3b8"/>
+    <line x1="0" y1="20" x2="36" y2="20" class="sch-connector"/>
+    <polygon points="32,16 40,20 32,24" class="sch-connector" fill="#94a3b8"/>
+    <line x1="0" y1="30" x2="40" y2="30" class="sch-connector"/>
+    <polygon points="36,26 44,30 36,34" class="sch-connector" fill="#94a3b8"/>
+  </g>
+  <g transform="translate(8, 160)">
+    <g id="sch-{{ widget.id }}-wind_speed" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ ws.get('label', 'WIND SPEED') }}</text>
+      <text class="sch-value" x="0" y="16">&#8212;</text>
+      <text class="sch-unit" x="0" y="26">{{ ws.get('unit', 'm/s') }}</text>
+    </g>
+  </g>
+
+  {# ── Rotor (x=110) — 3-blade symbol ── #}
+  <circle cx="130" cy="130" r="10" class="sch-equip"/>
+  <ellipse cx="130" cy="100" rx="4" ry="28" class="sch-equip"/>
+  <ellipse cx="156" cy="145" rx="4" ry="28" class="sch-equip" transform="rotate(60 156 145)"/>
+  <ellipse cx="104" cy="145" rx="4" ry="28" class="sch-equip" transform="rotate(-60 104 145)"/>
+  <text class="sch-equip-label" x="110" y="186">ROTOR</text>
+
+  {# rotor_rpm anchor (above rotor) #}
+  {% set rr = ns.anchor_map.get('rotor_rpm', {}) %}
+  <g transform="translate(96, 200)">
+    <g id="sch-{{ widget.id }}-rotor_rpm" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ rr.get('label', 'ROTOR RPM') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="0" y="23">{{ rr.get('unit', 'rpm') }}</text>
+    </g>
+  </g>
+  {# pitch anchor (below rotor) #}
+  {% set pt = ns.anchor_map.get('pitch', {}) %}
+  <g transform="translate(96, 248)">
+    <g id="sch-{{ widget.id }}-pitch" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ pt.get('label', 'PITCH') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="0" y="23">{{ pt.get('unit', '°') }}</text>
+    </g>
+  </g>
+
+  {# Shaft rotor→gearbox #}
+  <line x1="168" y1="130" x2="260" y2="130" class="sch-connector" stroke-width="3"/>
+
+  {# ── Gearbox (260,95 w=110 h=70) ── #}
+  <rect x="260" y="95" width="110" height="70" class="sch-equip"/>
+  <line x1="270" y1="130" x2="360" y2="130" class="sch-connector"/>
+  <text class="sch-equip-label" x="270" y="90">GEARBOX</text>
+
+  {# gearbox anchors inside the box #}
+  {% set got = ns.anchor_map.get('gearbox_oil_temp', {}) %}
+  <g transform="translate(268, 112)">
+    <g id="sch-{{ widget.id }}-gearbox_oil_temp" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ got.get('label', 'OIL TEMP') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="68" y="14">{{ got.get('unit', '°C') }}</text>
+    </g>
+  </g>
+  {% set gv = ns.anchor_map.get('gearbox_vibration', {}) %}
+  <g transform="translate(268, 140)">
+    <g id="sch-{{ widget.id }}-gearbox_vibration" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ gv.get('label', 'VIB') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="68" y="14">{{ gv.get('unit', 'mm/s') }}</text>
+    </g>
+  </g>
+
+  {# Shaft gearbox→generator #}
+  <line x1="370" y1="130" x2="460" y2="130" class="sch-connector" stroke-width="3"/>
+
+  {# ── Generator circle at x=500 ── #}
+  <circle cx="500" cy="130" r="42" class="sch-equip"/>
+  <line x1="458" y1="130" x2="468" y2="130" class="sch-equip"/>
+  <line x1="532" y1="130" x2="548" y2="130" class="sch-equip"/>
+  <line x1="500" y1="88" x2="500" y2="98" class="sch-equip"/>
+  <text class="sch-equip-label" x="480" y="90">GEN</text>
+
+  {# gen anchors — stacked to the right/below the generator circle #}
+  {% set gr = ns.anchor_map.get('gen_rpm', {}) %}
+  <g transform="translate(470, 200)">
+    <g id="sch-{{ widget.id }}-gen_rpm" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ gr.get('label', 'GEN RPM') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="0" y="23">{{ gr.get('unit', 'rpm') }}</text>
+    </g>
+  </g>
+  {% set gp = ns.anchor_map.get('gen_power', {}) %}
+  <g transform="translate(470, 248)">
+    <g id="sch-{{ widget.id }}-gen_power" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ gp.get('label', 'GEN POWER') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="0" y="23">{{ gp.get('unit', 'kW') }}</text>
+    </g>
+  </g>
+
+  {# Bus to converter #}
+  <line x1="548" y1="130" x2="630" y2="130" class="sch-connector"/>
+
+  {# ── Converter box (630,100 w=90 h=60) with zigzag ── #}
+  <rect x="630" y="100" width="90" height="60" class="sch-equip"/>
+  <polyline points="642,140 654,120 666,140 678,120 690,140 702,120 708,140" class="sch-equip"/>
+  <text class="sch-equip-label" x="640" y="94">CONVERTER</text>
+
+  {# Connector converter→transformer #}
+  <line x1="720" y1="130" x2="790" y2="130" class="sch-connector"/>
+
+  {# ── Transformer (790,100) coupled coils ── #}
+  {% for i in range(3) %}
+    <path d="M 800 {{ 106 + i*16 }} a 6 6 0 0 1 0 12" class="sch-equip"/>
+    <path d="M 824 {{ 106 + i*16 }} a 6 6 0 0 0 0 12" class="sch-equip"/>
+  {% endfor %}
+  <rect x="790" y="100" width="50" height="60" class="sch-connector-dashed"/>
+  <text class="sch-equip-label" x="790" y="94">TX</text>
+
+  {# grid_power anchor (below transformer) #}
+  {% set gpw = ns.anchor_map.get('grid_power', {}) %}
+  <g transform="translate(770, 200)">
+    <g id="sch-{{ widget.id }}-grid_power" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ gpw.get('label', 'GRID POWER') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="0" y="23">{{ gpw.get('unit', 'kW') }}</text>
+    </g>
+  </g>
+
+  {# Output to grid #}
+  <line x1="840" y1="130" x2="920" y2="130" class="sch-connector"/>
+  <polygon points="920,124 934,130 920,136" class="sch-connector" fill="#94a3b8"/>
+  <text class="sch-equip-label" x="898" y="154">GRID</text>
+</svg>

@@ -1,0 +1,112 @@
+{# farm_sld — whole-farm electrical single-line diagram (1000 x 420) #}
+<svg viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Farm single-line diagram">
+  {# ── Static geometry: turbines, array cables, HV bus ── #}
+
+  {# Turbine rows #}
+  {% for i in range(4) %}
+    {% set ty = 40 + i * 90 %}
+    <a href="/hmi/drilldown/WTG0{{ i + 1 }}" target="_self" class="sch-turbine-link">
+      {# rotor circle + blades #}
+      <circle cx="80" cy="{{ ty + 30 }}" r="18" class="sch-equip"/>
+      <line x1="80" y1="{{ ty + 12 }}" x2="80" y2="{{ ty + 48 }}" class="sch-equip"/>
+      <line x1="64" y1="{{ ty + 38 }}" x2="96" y2="{{ ty + 22 }}" class="sch-equip"/>
+      <line x1="64" y1="{{ ty + 22 }}" x2="96" y2="{{ ty + 38 }}" class="sch-equip"/>
+      {# nacelle rect #}
+      <rect x="102" y="{{ ty + 18 }}" width="96" height="24" class="sch-equip"/>
+      <text class="sch-equip-label" x="108" y="{{ ty + 12 }}">WTG0{{ i + 1 }}</text>
+      {# array cable to bus #}
+      <path d="M 198 {{ ty + 30 }} L 330 {{ ty + 30 }} L 330 180 L 430 180" class="sch-connector"/>
+    </a>
+  {% endfor %}
+
+  {# HV bus bar #}
+  <text class="sch-equip-label" x="430" y="168">33 KV BUS</text>
+  <line x1="430" y1="180" x2="580" y2="180" class="sch-bus"/>
+  <line x1="580" y1="180" x2="620" y2="180" class="sch-connector"/>
+
+  {# Transformer body (two coupled circles) #}
+  <rect x="615" y="148" width="100" height="64" rx="2" class="sch-connector-dashed"/>
+  <circle cx="645" cy="180" r="22" class="sch-equip"/>
+  <circle cx="685" cy="180" r="22" class="sch-equip"/>
+  <text class="sch-equip-label" x="630" y="228">TRANSFORMER 33/132 KV</text>
+  <line x1="715" y1="180" x2="750" y2="180" class="sch-connector"/>
+
+  {# Grid terminator #}
+  <line x1="820" y1="180" x2="880" y2="180" class="sch-connector"/>
+  <polygon points="880,174 894,180 880,186" class="sch-connector" fill="#94a3b8"/>
+  <text class="sch-equip-label" x="860" y="208">GRID 132 KV</text>
+
+  {# ── Value/state anchor groups (transform wrappers static; inner <g> swapped) ── #}
+
+  {# Per-turbine power anchors (right side of each nacelle) #}
+  {% for i in range(4) %}
+    {% set ty = 40 + i * 90 %}
+    {% set akey = 'wtg' ~ (i+1) ~ '_power' %}
+    {% set entry = ns.anchor_map.get(akey, {}) %}
+    <g transform="translate(210, {{ ty + 16 }})">
+      <g id="sch-{{ widget.id }}-{{ akey }}" class="sch-anchor">
+        <text class="sch-label" x="0" y="0">{{ entry.get('label', 'WTG0' ~ (i+1) ~ ' POWER') }}</text>
+        <text class="sch-value" x="0" y="14">&#8212;</text>
+        <text class="sch-unit" x="0" y="23">{{ entry.get('unit', 'kW') }}</text>
+      </g>
+    </g>
+    {% set skey = 'wtg' ~ (i+1) ~ '_status' %}
+    {% set sentry = ns.anchor_map.get(skey, {}) %}
+    <g transform="translate(52, {{ ty + 28 }})">
+      <text class="sch-label" x="-8" y="18">{{ sentry.get('label', 'RUN') }}</text>
+      <g id="sch-{{ widget.id }}-{{ skey }}" class="sch-anchor sch-state-off">
+        <circle class="sch-equip" cx="0" cy="0" r="5"/>
+      </g>
+    </g>
+  {% endfor %}
+
+  {# Bus voltage anchor #}
+  {% set bv = ns.anchor_map.get('bus_voltage', {}) %}
+  <g transform="translate(480, 158)">
+    <g id="sch-{{ widget.id }}-bus_voltage" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ bv.get('label', 'BUS VOLTAGE') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="0" y="23">{{ bv.get('unit', 'kV') }}</text>
+    </g>
+  </g>
+
+  {# Transformer oil temp anchor #}
+  {% set tot = ns.anchor_map.get('transformer_oil_temp', {}) %}
+  <g transform="translate(615, 264)">
+    <g id="sch-{{ widget.id }}-transformer_oil_temp" class="sch-anchor">
+      <text class="sch-label" x="0" y="0">{{ tot.get('label', 'OIL TEMP') }}</text>
+      <text class="sch-value" x="0" y="14">&#8212;</text>
+      <text class="sch-unit" x="0" y="23">{{ tot.get('unit', '°C') }}</text>
+    </g>
+  </g>
+
+  {# Export breaker anchor (state-colored) — between transformer and grid #}
+  {% set eb = ns.anchor_map.get('export_breaker', {}) %}
+  <g transform="translate(750, 160)">
+    <text class="sch-label" x="10" y="54">{{ eb.get('label', 'EXPORT BRK') }}</text>
+    <g id="sch-{{ widget.id }}-export_breaker" class="sch-anchor sch-state-off">
+      <line class="sch-connector" x1="0" y1="20" x2="54" y2="20"/>
+      <circle class="sch-equip" cx="0" cy="20" r="3"/>
+      <circle class="sch-equip" cx="54" cy="20" r="3"/>
+      <rect class="sch-equip" x="22" y="14" width="12" height="12"/>
+    </g>
+  </g>
+
+  {# Right-side stack tiles: export_mw, export_current, grid_freq #}
+  {% set tiles = [
+    ('export_mw', 'EXPORT MW', 'MW', 50),
+    ('export_current', 'EXPORT CURRENT', 'A', 140),
+    ('grid_freq', 'GRID FREQ', 'Hz', 230),
+  ] %}
+  {% for akey, default_label, default_unit, ty in tiles %}
+    {% set entry = ns.anchor_map.get(akey, {}) %}
+    <rect x="880" y="{{ ty - 12 }}" width="110" height="56" class="sch-connector-dashed"/>
+    <g transform="translate(888, {{ ty }})">
+      <g id="sch-{{ widget.id }}-{{ akey }}" class="sch-anchor">
+        <text class="sch-label" x="0" y="0">{{ entry.get('label', default_label) }}</text>
+        <text class="sch-value" x="0" y="20">&#8212;</text>
+        <text class="sch-unit" x="0" y="32">{{ entry.get('unit', default_unit) }}</text>
+      </g>
+    </g>
+  {% endfor %}
+</svg>

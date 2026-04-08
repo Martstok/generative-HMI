@@ -1,0 +1,13 @@
+<div class="hmi-widget hmi-alarm-list" style="grid-column: span {{ widget.columns }}">
+  <div class="widget-header">{{ widget.title }}</div>
+  <div class="alarm-container">
+    {% for tag in widget.tags %}
+    <div id="alarm-{{ widget.id }}-{{ loop.index0 }}" class="alarm-row">
+      <div class="alarm-dot alarm-dot-ok"></div>
+      <span class="alarm-label">{{ tag.label }}</span>
+      <span class="alarm-status" id="val-{{ widget.id }}-{{ loop.index0 }}">&mdash;</span>
+      <span class="alarm-time">&mdash;</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>

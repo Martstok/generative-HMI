@@ -1,0 +1,10 @@
+<div class="hmi-widget hmi-value-card" style="grid-column: span {{ widget.columns }}">
+  <div class="widget-header">{{ widget.title }}</div>
+  {% for tag in widget.tags %}
+  <div class="value-display">
+    <span class="value-label">{{ tag.label }}</span>
+    <span class="value-number" id="val-{{ widget.id }}-{{ loop.index0 }}">&mdash;</span>
+    <span class="value-unit">{{ tag.unit }}</span>
+  </div>
+  {% endfor %}
+</div>

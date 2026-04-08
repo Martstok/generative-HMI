@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "generative-hmi"
+version = "0.1.0"
+description = "AI-generated HMI screens for industrial control — live OPC UA, SVG schematics"
+requires-python = ">=3.11"
+dependencies = [
+    "click>=8.0",
+    "pydantic>=2.0",
+    "loguru",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.29",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+    "asyncua>=1.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["tools"]
+
+[project.scripts]
+generative-hmi = "tools.gui:main"

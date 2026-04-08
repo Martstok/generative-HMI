@@ -1,0 +1,24 @@
+<div class="hmi-widget hmi-trend-chart" style="grid-column: span {{ widget.columns }}">
+  <div class="widget-header">{{ widget.title }}</div>
+  <svg id="trend-{{ widget.id }}" viewBox="0 0 600 200" width="100%" preserveAspectRatio="xMidYMid meet">
+    <rect x="0" y="0" width="600" height="200" fill="#0f172a" rx="4"/>
+    <!-- Gridlines -->
+    <line x1="0" y1="50"  x2="600" y2="50"  stroke="#1e293b" stroke-width="1"/>
+    <line x1="0" y1="100" x2="600" y2="100" stroke="#1e293b" stroke-width="1"/>
+    <line x1="0" y1="150" x2="600" y2="150" stroke="#1e293b" stroke-width="1"/>
+    <line x1="0" y1="200" x2="600" y2="200" stroke="#1e293b" stroke-width="1"/>
+    <!-- Placeholder text -->
+    <text x="300" y="105" text-anchor="middle" font-size="14"
+          font-family="'Inter', sans-serif" fill="#475569">Waiting for data...</text>
+  </svg>
+  <div class="trend-legend">
+    {% set colors = ['#3b82f6', '#06b6d4', '#f59e0b', '#ef4444'] %}
+    {% for tag in widget.tags %}
+    <div class="trend-legend-item">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{{ colors[loop.index0 % 4] }}"></span>
+      <span>{{ tag.label }}{% if tag.unit %} ({{ tag.unit }}){% endif %}</span>
+      <span class="value-number" id="val-{{ widget.id }}-{{ loop.index0 }}">&mdash;</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>

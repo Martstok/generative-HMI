@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+{% set active = "home" %}
+{% block title %}{{ spec.title }} — HMI{% endblock %}
+{% block content %}
+
+<div class="screen-header">
+  <div class="screen-header-top">
+    <a href="/" class="back-link">← Back to screens</a>
+    <div class="screen-actions">
+      {% if spec_name %}
+      {% if spec.prompt %}
+      <a href="/" class="btn-action" onclick="sessionStorage.setItem('edit-prompt', '{{ spec.prompt | e }}')">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.33 2a1.89 1.89 0 012.67 2.67L5.67 13 2 14l1-3.67L11.33 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Regenerate
+      </a>
+      {% endif %}
+      <button class="btn-action" onclick="openRefineModal()" title="Refine this screen with AI">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2L9.5 6.5L14 8L9.5 9.5L8 14L6.5 9.5L2 8L6.5 6.5L8 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        Refine
+      </button>
+      <button class="btn-action" onclick="toggleEditMode()" id="edit-mode-btn">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2H2v4M10 14h4v-4M2 10v4h4M14 6V2h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Edit Layout
+      </button>
+      <button class="btn-action btn-danger" onclick="confirmDeleteScreen('{{ spec_name }}')" title="Delete screen">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5.33 4V2.67a1.33 1.33 0 011.34-1.34h2.66a1.33 1.33 0 011.34 1.34V4M6.67 7.33v4M9.33 7.33v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3.33 4l.67 9.33a1.33 1.33 0 001.33 1.34h5.34a1.33 1.33 0 001.33-1.34L12.67 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Delete
+      </button>
+      {% endif %}
+    </div>
+  </div>
+  <h2>{{ spec.title }}</h2>
+  {% if spec.description %}<p>{{ spec.description }}</p>{% endif %}
+  <div class="screen-meta">
+    <span>{{ spec.widgets|length }} widgets</span>
+    <span>{{ all_tags_csv.split(',')|length }} tags</span>
+    <span>Poll: {{ spec.poll_interval_ms }}ms</span>
+  </div>
+</div>
+
+<!-- Single poller for ALL tags — htmx OOB swaps values into individual widgets -->
+<div id="hmi-poller"
+     hx-get="/api/hmi/tags?instance={{ spec.instance_name }}&tags={{ all_tags_csv }}&spec_name={{ spec_name }}"
+     hx-trigger="every {{ spec.poll_interval_ms }}ms"
+     hx-swap="none">
+</div>
+
+<div class="hmi-grid" style="display: grid; grid-template-columns: repeat({{ spec.columns }}, 1fr); gap: var(--hmi-grid-gap);">
+  {% for widget_html in widget_htmls %}
+    {{ widget_html | safe }}
+  {% endfor %}
+</div>
+
+<script>
+let editMode = false;
+function toggleEditMode() {
+  editMode = !editMode;
+  const grid = document.querySelector('.hmi-grid');
+  const btn = document.getElementById('edit-mode-btn');
+  grid.classList.toggle('edit-mode', editMode);
+  btn.classList.toggle('active', editMode);
+  btn.innerHTML = editMode
+    ? '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8.5L6.5 13L14 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Save Layout'
+    : '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2H2v4M10 14h4v-4M2 10v4h4M14 6V2h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Edit Layout';
+
+  if (editMode) {
+    enableDragDrop(grid);
+    addResizeHandles(grid);
+  } else {
+    saveLayout();
+    disableDragDrop(grid);
+    removeResizeHandles(grid);
+  }
+}
+
+function enableDragDrop(grid) {
+  grid.querySelectorAll('.hmi-widget').forEach(w => {
+    w.draggable = true;
+    w.addEventListener('dragstart', handleDragStart);
+    w.addEventListener('dragover', handleDragOver);
+    w.addEventListener('drop', handleDrop);
+    w.addEventListener('dragend', handleDragEnd);
+  });
+}
+
+function disableDragDrop(grid) {
+  grid.querySelectorAll('.hmi-widget').forEach(w => {
+    w.draggable = false;
+    w.removeEventListener('dragstart', handleDragStart);
+    w.removeEventListener('dragover', handleDragOver);
+    w.removeEventListener('drop', handleDrop);
+    w.removeEventListener('dragend', handleDragEnd);
+  });
+}
+
+let dragSrc = null;
+function handleDragStart(e) {
+  dragSrc = this;
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function handleDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  this.classList.add('drag-over');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  if (dragSrc !== this) {
+    const grid = this.parentNode;
+    const children = [...grid.children].filter(c => c.classList.contains('hmi-widget'));
+    const srcIdx = children.indexOf(dragSrc);
+    const tgtIdx = children.indexOf(this);
+    if (srcIdx < tgtIdx) {
+      grid.insertBefore(dragSrc, this.nextSibling);
+    } else {
+      grid.insertBefore(dragSrc, this);
+    }
+  }
+  this.classList.remove('drag-over');
+}
+function handleDragEnd(e) {
+  document.querySelectorAll('.hmi-widget').forEach(w => {
+    w.classList.remove('dragging', 'drag-over');
+  });
+}
+
+function addResizeHandles(grid) {
+  grid.querySelectorAll('.hmi-widget').forEach(w => {
+    const controls = document.createElement('div');
+    controls.className = 'resize-controls';
+    const currentCols = parseInt(w.style.gridColumn?.replace('span ', '') || '1');
+    controls.innerHTML = `
+      <button onclick="resizeWidget(this, -1)" class="btn-resize" ${currentCols <= 1 ? 'disabled' : ''}>−</button>
+      <span class="resize-label">${currentCols} col</span>
+      <button onclick="resizeWidget(this, 1)" class="btn-resize" ${currentCols >= 4 ? 'disabled' : ''}>+</button>
+    `;
+    w.appendChild(controls);
+  });
+}
+
+function removeResizeHandles(grid) {
+  grid.querySelectorAll('.resize-controls').forEach(c => c.remove());
+}
+
+function resizeWidget(btn, delta) {
+  const widget = btn.closest('.hmi-widget');
+  const current = parseInt(widget.style.gridColumn?.replace('span ', '') || '1');
+  const next = Math.max(1, Math.min(4, current + delta));
+  widget.style.gridColumn = `span ${next}`;
+  const controls = widget.querySelector('.resize-controls');
+  controls.querySelector('.resize-label').textContent = `${next} col`;
+  controls.querySelectorAll('.btn-resize')[0].disabled = next <= 1;
+  controls.querySelectorAll('.btn-resize')[1].disabled = next >= 4;
+}
+
+async function saveLayout() {
+  const grid = document.querySelector('.hmi-grid');
+  const widgets = [...grid.querySelectorAll('.hmi-widget')].map(w => {
+    const id = (w.querySelector('[id^="val-"]')?.id || '').split('-')[1] || w.querySelector('[id^="gauge-"]')?.id.split('-')[1] || w.querySelector('[id^="dot-"]')?.id.split('-')[1] || w.querySelector('[id^="bar-"]')?.id.split('-')[1] || '';
+    const cols = parseInt(w.style.gridColumn?.replace('span ', '') || '1');
+    return {id: id, columns: cols};
+  });
+  // Filter out empty IDs
+  const validWidgets = widgets.filter(w => w.id);
+  if (validWidgets.length === 0) return;
+
+  const specName = '{{ spec_name }}';
+  await fetch(`/api/hmi/screen/${specName}/layout`, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({widgets: validWidgets})
+  });
+}
+
+async function confirmDeleteScreen(name) {
+  if (!confirm('Delete screen "' + name + '"?')) return;
+  const resp = await fetch('/api/hmi/screen/' + name, {method: 'DELETE'});
+  if (resp.ok) window.location.href = '/';
+}
+
+function openRefineModal() {
+  document.getElementById('refine-modal').classList.add('active');
+  const sel = document.getElementById('refine-model');
+  if (sel) {
+    const saved = localStorage.getItem('hmi-model');
+    if (saved) sel.value = saved;
+    sel.onchange = () => localStorage.setItem('hmi-model', sel.value);
+  }
+  setTimeout(() => document.querySelector('#refine-form textarea')?.focus(), 50);
+}
+function closeRefineModal() {
+  document.getElementById('refine-modal').classList.remove('active');
+  document.getElementById('refine-status').innerHTML = '';
+}
+
+// ── Sparklines ──
+const sparkHistory = {};  // id -> number[]
+const SPARK_MAX = 30;     // keep last 30 samples
+
+function updateSparkline(id, value) {
+  if (isNaN(value)) return;
+  if (!sparkHistory[id]) sparkHistory[id] = [];
+  const hist = sparkHistory[id];
+  hist.push(value);
+  if (hist.length > SPARK_MAX) hist.shift();
+  if (hist.length < 3) return;
+
+  const container = document.getElementById('spark-' + id);
+  if (!container) return;
+
+  const min = Math.min(...hist);
+  const max = Math.max(...hist);
+  const range = max - min || 1;
+  const w = 100;
+  const h = 20;
+  const step = w / (hist.length - 1);
+
+  const points = hist.map((v, i) => {
+    const x = (i * step).toFixed(1);
+    const y = (h - ((v - min) / range) * h * 0.8 - h * 0.1).toFixed(1);
+    return `${x},${y}`;
+  });
+
+  const areaPoints = points.join(' ') + ` ${w},${h} 0,${h}`;
+  container.innerHTML = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <polygon class="sparkline-area" points="${areaPoints}"/>
+    <polyline class="sparkline-line" points="${points.join(' ')}"/>
+  </svg>`;
+}
+
+// After each poll response settles, scan value cards for updates.
+// Use afterRequest on the poller + short delay to ensure OOB swaps are done.
+document.body.addEventListener('htmx:afterRequest', function(e) {
+  if (!e.detail.elt || e.detail.elt.id !== 'hmi-poller') return;
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.hmi-value-card .value-number').forEach(el => {
+      if (!el.id || !el.id.startsWith('val-')) return;
+      const text = el.textContent.trim().replace(/[^\d.\-]/g, '');
+      const num = parseFloat(text);
+      updateSparkline(el.id, num);
+    });
+    // Fix SVG namespace on schematic OOB swaps (htmx creates them in HTML ns)
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const reNs = (el) => {
+      const svg = document.createElementNS(SVG_NS, el.tagName.toLowerCase());
+      for (const a of el.attributes) svg.setAttribute(a.name, a.value);
+      // Strip htmx transient classes — they don't auto-clear on re-namespaced nodes
+      const cls = svg.getAttribute('class');
+      if (cls) {
+        svg.setAttribute('class', cls.replace(/\bhtmx-(added|settling|swapping)\b/g, '').replace(/\s+/g, ' ').trim());
+      }
+      for (const c of [...el.childNodes]) {
+        if (c.nodeType === 1) svg.appendChild(reNs(c));
+        else svg.appendChild(c.cloneNode(true));
+      }
+      return svg;
+    };
+    document.querySelectorAll('g.sch-anchor').forEach(g => {
+      if (g.namespaceURI === SVG_NS) return;
+      window._debugLog = window._debugLog || [];
+      window._debugLog.push({id:g.id, oldCls:g.getAttribute('class'), newNs:true});
+      g.replaceWith(reNs(g));
+    });
+  });
+});
+
+// Inject sparkline containers into value cards on load
+document.querySelectorAll('.hmi-value-card .value-number').forEach(el => {
+  if (el.id && el.id.startsWith('val-')) {
+    const container = document.createElement('div');
+    container.id = 'spark-' + el.id;
+    container.className = 'sparkline-container';
+    el.parentElement.appendChild(container);
+  }
+});
+
+// ── Command widget: confirmation dialog ──
+let _cmdPendingTag = '';
+let _cmdPendingValue = '';
+
+function confirmCommand(tag, label, value) {
+  _cmdPendingTag = tag;
+  _cmdPendingValue = value;
+  const modal = document.getElementById('cmd-confirm-modal');
+  if (!modal) return;
+  document.getElementById('cmd-confirm-msg').textContent =
+    `Write "${label}" = ${value}?`;
+  modal.classList.add('active');
+}
+
+function cancelCommand() {
+  const modal = document.getElementById('cmd-confirm-modal');
+  if (modal) modal.classList.remove('active');
+  _cmdPendingTag = '';
+  _cmdPendingValue = '';
+}
+
+async function ackAlarm(stateKey) {
+  try {
+    await fetch('/api/hmi/alarm-ack', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({state_key: stateKey}),
+    });
+  } catch (err) {
+    console.error('Ack failed:', err);
+  }
+}
+function ackAlarmBtn(btn) {
+  const key = btn.getAttribute('data-key');
+  if (key) ackAlarm(key);
+}
+
+async function executeCommand() {
+  const modal = document.getElementById('cmd-confirm-modal');
+  if (modal) modal.classList.remove('active');
+  if (!_cmdPendingTag) return;
+
+  try {
+    const resp = await fetch('/api/hmi/write-tag', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({tag: _cmdPendingTag, value: _cmdPendingValue})
+    });
+    const data = await resp.json();
+    if (!data.ok) {
+      console.error('Command failed:', data.message);
+    }
+  } catch (err) {
+    console.error('Command error:', err);
+  }
+  _cmdPendingTag = '';
+  _cmdPendingValue = '';
+}
+</script>
+
+<!-- Refine screen modal -->
+{% if spec_name %}
+<div id="refine-modal" class="cmd-modal">
+  <div class="cmd-modal-content cmd-modal-wide">
+    <h4 style="margin:0 0 0.5rem">Refine screen with AI</h4>
+    <p style="margin:0 0 0.75rem;font-size:0.8rem;color:var(--hmi-text-muted)">
+      Describe a change: e.g. "add a trend chart for gearbox oil temp" or "remove the yaw gauge".
+    </p>
+    <form id="refine-form" hx-post="/api/hmi/refine/{{ spec_name }}"
+          hx-target="#refine-status" hx-swap="innerHTML"
+          onsubmit="setTimeout(()=>document.querySelector('#refine-form textarea').value='',100)">
+      <textarea name="prompt" rows="3" required
+                placeholder="What should change?"
+                style="width:100%;margin-bottom:0.5rem"></textarea>
+      <div class="cmd-modal-actions">
+        <select name="model" class="model-select" id="refine-model" title="Model">
+          <option value="claude-sonnet-4-6">SONNET</option>
+          <option value="claude-opus-4-6">OPUS</option>
+          <option value="claude-haiku-4-5-20251001">HAIKU</option>
+        </select>
+        <button type="submit" class="cmd-confirm">Apply</button>
+        <button type="button" class="cmd-cancel" onclick="closeRefineModal()">Cancel</button>
+      </div>
+    </form>
+    <div id="refine-status" style="margin-top:0.75rem"></div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Global command confirmation modal -->
+<div id="cmd-confirm-modal" class="cmd-modal">
+  <div class="cmd-modal-content">
+    <p id="cmd-confirm-msg">Confirm command?</p>
+    <div class="cmd-modal-actions">
+      <button class="cmd-confirm" onclick="executeCommand()">Confirm</button>
+      <button class="cmd-cancel" onclick="cancelCommand()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

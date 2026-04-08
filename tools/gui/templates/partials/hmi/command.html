@@ -1,0 +1,21 @@
+<div class="hmi-widget hmi-command" style="grid-column: span {{ widget.columns }}">
+  <div class="widget-header">{{ widget.title }}</div>
+  <div class="cmd-grid">
+    {% for tag in widget.tags %}
+    <div class="cmd-item">
+      <button class="cmd-btn{% if 'emergency' in tag.label | lower or 'stop' in tag.label | lower %} cmd-btn-danger{% endif %}"
+              onclick="confirmCommand('{{ tag.tag | e }}', '{{ tag.label | e }}', '{{ widget.write_value | e }}')">
+        {{ tag.label }}
+      </button>
+      <span class="cmd-status" id="val-{{ widget.id }}-{{ loop.index0 }}">&mdash;</span>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="cmd-modal" id="cmd-modal-{{ widget.id }}" style="display:none">
+    <div class="cmd-modal-content">
+      <p id="cmd-modal-msg-{{ widget.id }}"></p>
+      <button class="cmd-confirm">Confirm</button>
+      <button class="cmd-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
